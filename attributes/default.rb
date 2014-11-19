@@ -65,11 +65,11 @@ when 'arch'
 when 'smartos'
   default['rsyslog']['config_prefix'] = '/opt/local/etc'
   default['rsyslog']['modules'] = %w(immark imsolaris imtcp imudp)
-  default['rsyslog']['group'] = 'root'
+  default['rsyslog']['group'] = node['root_group']
 when 'omnios'
   default['rsyslog']['service_name'] = 'system/rsyslogd'
   default['rsyslog']['modules'] = %w(immark imsolaris imtcp imudp)
-  default['rsyslog']['group'] = 'root'
+  default['rsyslog']['group'] = node['root_group']
 end
 
 # 50-default template attributes

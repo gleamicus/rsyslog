@@ -23,16 +23,16 @@ node.set['rsyslog']['server'] = true
 include_recipe 'rsyslog::default'
 
 directory node['rsyslog']['log_dir'] do
-  owner    'root'
-  group    'root'
+  owner    node['root_user']
+  group    node['root_group']
   mode     '0755'
   recursive true
 end
 
 template "#{node['rsyslog']['config_prefix']}/rsyslog.d/35-server-per-host.conf" do
   source   '35-server-per-host.conf.erb'
-  owner    'root'
-  group    'root'
+  owner    node['root_user']
+  group    node['root_group']
   mode     '0644'
   notifies :restart, "service[#{node['rsyslog']['service_name']}]"
 end

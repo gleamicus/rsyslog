@@ -78,8 +78,8 @@ describe 'rsyslog::default' do
     end
 
     it 'is owned by root:root' do
-      expect(directory.owner).to eq('root')
-      expect(directory.group).to eq('root')
+      expect(directory.owner).to eq(node['root_user'])
+      expect(directory.group).to eq(node['root_group'])
     end
 
     it 'has 0755 permissions' do
@@ -98,8 +98,8 @@ describe 'rsyslog::default' do
       end
 
       it 'is owned by root:root' do
-        expect(directory.owner).to eq('root')
-        expect(directory.group).to eq('root')
+        expect(directory.owner).to eq(node['root_user'])
+        expect(directory.group).to eq(node['root_group'])
       end
 
       it 'has 0755 permissions' do
@@ -116,8 +116,8 @@ describe 'rsyslog::default' do
     end
 
     it 'is owned by root:root' do
-      expect(directory.owner).to eq('root')
-      expect(directory.group).to eq('root')
+      expect(directory.owner).to eq(node['root_user'])
+      expect(directory.group).to eq(node['root_group'])
     end
 
     it 'has 0755 permissions' do
@@ -134,8 +134,8 @@ describe 'rsyslog::default' do
     end
 
     it 'is owned by root:root' do
-      expect(template.owner).to eq('root')
-      expect(template.group).to eq('root')
+      expect(template.owner).to eq(node['root_user'])
+      expect(template.group).to eq(node['root_group'])
     end
 
     it 'has 0644 permissions' do
@@ -165,8 +165,8 @@ describe 'rsyslog::default' do
       end
 
       it 'is owned by root:root' do
-        expect(template.owner).to eq('root')
-        expect(template.group).to eq('root')
+        expect(template.owner).to eq(node['root_user'])
+        expect(template.group).to eq(node['root_group'])
       end
 
       it 'has 0644 permissions' do
@@ -193,8 +193,8 @@ describe 'rsyslog::default' do
     end
 
     it 'is owned by root:root' do
-      expect(template.owner).to eq('root')
-      expect(template.group).to eq('root')
+      expect(template.owner).to eq(node['root_user'])
+      expect(template.group).to eq(node['root_group'])
     end
 
     it 'has 0644 permissions' do
@@ -217,8 +217,8 @@ describe 'rsyslog::default' do
       end
 
       it 'is owned by root:root' do
-        expect(template.owner).to eq('root')
-        expect(template.group).to eq('root')
+        expect(template.owner).to eq(node['root_user'])
+        expect(template.group).to eq(node['root_group'])
       end
 
       it 'has 0644 permissions' do
