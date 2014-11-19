@@ -70,6 +70,10 @@ when 'omnios'
   default['rsyslog']['service_name'] = 'system/rsyslogd'
   default['rsyslog']['modules'] = %w(immark imsolaris imtcp imudp)
   default['rsyslog']['group'] = node['root_group']
+when 'freebsd'
+  default['rsyslog']['service_name'] = 'rsyslogd'
+  default['rsyslog']['config_prefix'] = '/usr/local/etc'
+  default['rsyslog']['group'] = node['root_group']
 end
 
 # 50-default template attributes
