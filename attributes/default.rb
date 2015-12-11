@@ -47,7 +47,7 @@ default['rsyslog']['use_local_ipv4']            = false
 
 # The most likely platform-specific attributes
 default['rsyslog']['service_name']              = 'rsyslog'
-default['rsyslog']['user']                      = 'root'
+default['rsyslog']['user']                      = node['root_user']
 default['rsyslog']['group']                     = 'adm'
 default['rsyslog']['priv_seperation']           = false
 default['rsyslog']['modules']                   = %w(imuxsock imklog)
