@@ -26,13 +26,13 @@ if node['rsyslog']['enable_tls'] && node['rsyslog']['tls_ca_file']
 end
 
 directory "#{node['rsyslog']['config_prefix']}/rsyslog.d" do
-  owner node['root_user']
+  owner node['root_user'] || 'root'
   group node['root_group']
   mode  '0755'
 end
 
 directory '/var/spool/rsyslog' do
-  owner node['root_user']
+  owner node['root_user'] || 'root'
   group node['root_group']
   mode  '0755'
 end
@@ -41,7 +41,7 @@ end
 # include of things in /etc/rsyslog.d/*
 template "#{node['rsyslog']['config_prefix']}/rsyslog.conf" do
   source  'rsyslog.conf.erb'
-  owner   node['root_user']
+  owner   node['root_user'] || 'root'
   group   node['root_group']
   mode    '0644'
   notifies :restart, "service[#{node['rsyslog']['service_name']}]"
@@ -49,7 +49,7 @@ end
 
 template "#{node['rsyslog']['config_prefix']}/rsyslog.d/50-default.conf" do
   source  '50-default.conf.erb'
-  owner   node['root_user']
+  owner   node['root_user'] || 'root'
   group   node['root_group']
   mode    '0644'
   notifies :restart, "service[#{node['rsyslog']['service_name']}]"
@@ -71,7 +71,7 @@ if platform_family?('omnios')
   # manage the SMF manifest on OmniOS
   template '/var/svc/manifest/system/rsyslogd.xml' do
     source 'omnios-manifest.xml.erb'
-    owner node['root_user']
+    owner node['root_user'] || 'root'
     group node['root_group']
     mode '0644'
     notifies :run, 'execute[import rsyslog manifest]', :immediately
