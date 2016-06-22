@@ -1,24 +1,15 @@
 require 'spec_helper'
 
 describe 'rsyslog::client' do
-  context "when node['rsyslog']['server_ip'] is not set" do
-    before do
-      Chef::Log.stub(:fatal)
-      $stdout.stub(:puts)
-    end
-
-    it 'exits fatally' do
-      expect { ChefSpec::ChefRunner.new.converge('rsyslog::client') }.to raise_error(SystemExit)
-    end
-  end
-
   let(:chef_run) do
-    ChefSpec::ChefRunner.new(platform: 'ubuntu', version: '12.04') do |node|
+    ChefSpec::ServerRunner.new(platform: 'ubuntu', version: '12.04') do |node|
       node.set['rsyslog']['server_ip'] = server_ip
-    end.converge('rsyslog::client')
+      node.set['rsyslog']['custom_remote'] = custom_remote
+    end.converge(described_recipe)
   end
 
   let(:server_ip) { "10.#{rand(1..9)}.#{rand(1..9)}.50" }
+  let(:custom_remote) { [{ 'server' => '10.0.0.1', 'port' => 555, 'protocol' => 'tcp', 'logs' => 'auth.*,mail.*', 'remote_template' => 'RSYSLOG_SyslogProtocol23Format' }] }
   let(:service_resource) { 'service[rsyslog]' }
 
   it 'includes the default recipe' do
@@ -29,7 +20,10 @@ describe 'rsyslog::client' do
     let(:template) { chef_run.template('/etc/rsyslog.d/49-remote.conf') }
 
     it 'creates the template' do
-      expect(chef_run).to create_file_with_content(template.path, "*.* @@#{server_ip}:514")
+      expect(chef_run).to render_file(template.path).with_content { |content|
+        expect(content).to include("*.* @@#{server_ip}:514")
+        expect(content).to include("#{custom_remote.first['logs']} @@#{custom_remote.first['server']}:#{custom_remote.first['port']};#{custom_remote.first['remote_template']}")
+      }
     end
 
     it 'is owned by root:root' do
@@ -42,20 +36,24 @@ describe 'rsyslog::client' do
     end
 
     it 'notifies restarting the service' do
-      expect(template).to notify(service_resource, :restart)
+      expect(template).to notify(service_resource).to(:restart)
     end
 
     context 'on SmartOS' do
       let(:chef_run) do
-        ChefSpec::ChefRunner.new(platform: 'smartos', version: 'joyent_20130111T180733Z') do |node|
+        ChefSpec::ServerRunner.new(platform: 'smartos', version: 'joyent_20130111T180733Z') do |node|
           node.set['rsyslog']['server_ip'] = server_ip
-        end.converge('rsyslog::client')
+          node.set['rsyslog']['custom_remote'] = custom_remote
+        end.converge(described_recipe)
       end
 
       let(:template) { chef_run.template('/opt/local/etc/rsyslog.d/49-remote.conf') }
 
       it 'creates the template' do
-        expect(chef_run).to create_file_with_content(template.path, "*.* @@#{server_ip}:514")
+        expect(chef_run).to render_file(template.path).with_content { |content|
+          expect(content).to include("*.* @@#{server_ip}:514")
+          expect(content).to include("#{custom_remote.first['logs']} @@#{custom_remote.first['server']}:#{custom_remote.first['port']};#{custom_remote.first['remote_template']}")
+        }
       end
 
       it 'is owned by root:root' do
@@ -68,7 +66,7 @@ describe 'rsyslog::client' do
       end
 
       it 'notifies restarting the service' do
-        expect(template).to notify(service_resource, :restart)
+        expect(template).to notify(service_resource).to(:restart)
       end
     end
   end
@@ -81,14 +79,14 @@ describe 'rsyslog::client' do
     end
 
     it 'notifies restarting the service' do
-      expect(file).to notify(service_resource, :reload)
+      expect(file).to notify(service_resource).to(:restart)
     end
 
     context 'on SmartOS' do
       let(:chef_run) do
-        ChefSpec::ChefRunner.new(platform: 'smartos', version: 'joyent_20130111T180733Z') do |node|
+        ChefSpec::ServerRunner.new(platform: 'smartos', version: 'joyent_20130111T180733Z') do |node|
           node.set['rsyslog']['server_ip'] = server_ip
-        end.converge('rsyslog::client')
+        end.converge(described_recipe)
       end
 
       let(:file) { chef_run.file('/opt/local/etc/rsyslog.d/server.conf') }
@@ -98,7 +96,7 @@ describe 'rsyslog::client' do
       end
 
       it 'notifies restarting the service' do
-        expect(file).to notify(service_resource, :reload)
+        expect(file).to notify(service_resource).to(:restart)
       end
     end
   end
