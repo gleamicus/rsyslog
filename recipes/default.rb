@@ -1,8 +1,8 @@
 #
-# Cookbook Name:: rsyslog
+# Cookbook:: rsyslog
 # Recipe:: default
 #
-# Copyright 2009-2015, Chef Software, Inc.
+# Copyright:: 2009-2017, Chef Software, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,12 +17,12 @@
 # limitations under the License.
 #
 
-package 'rsyslog'
-package 'rsyslog-relp' if node['rsyslog']['use_relp']
+package node['rsyslog']['package_name']
+package "#{node['rsyslog']['package_name']}-relp" if node['rsyslog']['use_relp']
 
 if node['rsyslog']['enable_tls'] && node['rsyslog']['tls_ca_file']
-  Chef::Application.fatal!("Recipe rsyslog::default can not use 'enable_tls' with protocol '#{node['rsyslog']['protocol']}' (requires 'tcp')") unless node['rsyslog']['protocol'] == 'tcp'
-  package 'rsyslog-gnutls'
+  raise "Recipe rsyslog::default can not use 'enable_tls' with protocol '#{node['rsyslog']['protocol']}' (requires 'tcp')" unless node['rsyslog']['protocol'] == 'tcp'
+  package "#{node['rsyslog']['package_name']}-gnutls"
 end
 
 directory "#{node['rsyslog']['config_prefix']}/rsyslog.d" do
@@ -35,25 +35,33 @@ directory node['rsyslog']['working_dir'] do
   owner node['rsyslog']['user']
   group node['rsyslog']['group']
   mode  '0700'
+  recursive true
+end
+
+execute 'validate_config' do
+  command "rsyslogd -N 1 -f #{node['rsyslog']['config_prefix']}/rsyslog.conf"
+  action  :nothing
 end
 
 # Our main stub which then does its own rsyslog-specific
 # include of things in /etc/rsyslog.d/*
 template "#{node['rsyslog']['config_prefix']}/rsyslog.conf" do
   source  'rsyslog.conf.erb'
-  owner   node['root_user']
-  group   node['root_group']
-  mode    '0644'
+  owner   node['rsyslog']['config_files']['owner']
+  group   node['rsyslog']['config_files']['group']
+  mode    node['rsyslog']['config_files']['mode']
+  notifies :run, 'execute[validate_config]'
   notifies :restart, "service[#{node['rsyslog']['service_name']}]"
 end
 
 template "#{node['rsyslog']['config_prefix']}/rsyslog.d/50-default.conf" do
   source  '50-default.conf.erb'
-  owner   node['root_user']
-  group   node['root_group']
-  mode    '0644'
+  owner   node['rsyslog']['config_files']['owner']
+  group   node['rsyslog']['config_files']['group']
+  mode    node['rsyslog']['config_files']['mode']
+  notifies :run, 'execute[validate_config]'
   notifies :restart, "service[#{node['rsyslog']['service_name']}]"
-end
+end unless node['rsyslog']['default_conf_file'] == false
 
 # syslog needs to be stopped before rsyslog can be started on RHEL versions before 6.0
 if platform_family?('rhel') && node['platform_version'].to_i < 6
