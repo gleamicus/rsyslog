@@ -18,7 +18,7 @@
 #
 
 package node['rsyslog']['package_name']
-package "#{node['rsyslog']['package_name']}-relp" if node['rsyslog']['use_relp']
+package "#{node['rsyslog']['package_name']}-relp" if node['rsyslog']['use_relp'] && node['os'] != 'freebsd'
 
 if node['rsyslog']['enable_tls'] && node['rsyslog']['tls_ca_file']
   raise "Recipe rsyslog::default can not use 'enable_tls' with protocol '#{node['rsyslog']['protocol']}' (requires 'tcp')" unless node['rsyslog']['protocol'] == 'tcp'
